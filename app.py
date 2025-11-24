@@ -7,17 +7,15 @@ def home():
     result = None
     if request.method == "POST":
         try:
-            # Take input from form
             amount = float(request.form.get("amount", 0))
             device_age = float(request.form.get("device_age", 365))
             location_diff = float(request.form.get("location_diff", 0))
             hour = int(request.form.get("hour", 12))
-            prev_fraud = request.form.get("prev_fraud", "no")  # yes / no
+            prev_fraud = request.form.get("prev_fraud", "no")
 
             score = 0.0
             reasons = []
 
-            # 1. Amount based risk
             if amount > 50000:
                 score += 0.5
                 reasons.append("Very high transaction amount")
@@ -28,7 +26,6 @@ def home():
                 score += 0.2
                 reasons.append("Moderate transaction amount")
 
-            # 2. Location difference
             if location_diff > 200:
                 score += 0.3
                 reasons.append("Unusual location (very far from normal)")
@@ -36,7 +33,6 @@ def home():
                 score += 0.2
                 reasons.append("Location different from usual city")
 
-            # 3. Device age
             if device_age < 7:
                 score += 0.25
                 reasons.append("New / untrusted device used")
@@ -44,17 +40,14 @@ def home():
                 score += 0.15
                 reasons.append("Recently used new device")
 
-            # 4. Time of transaction
             if hour < 6 or hour > 22:
                 score += 0.15
                 reasons.append("Transaction at unusual time (night hours)")
 
-            # 5. Previous fraud history
             if prev_fraud == "yes":
                 score += 0.25
                 reasons.append("Account has previous fraud history")
 
-            # Cap score
             if score < 0:
                 score = 0
             if score > 1:
@@ -62,7 +55,6 @@ def home():
 
             risk_percent = round(score * 100, 2)
 
-            # Risk level
             if risk_percent >= 70:
                 risk_level = "High Risk"
                 label = "⚠️ Highly Suspicious / Possible Fraud"
