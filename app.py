@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -7,54 +7,91 @@ def home():
     result = None
     if request.method == "POST":
         try:
+            # Take input from form
             amount = float(request.form.get("amount", 0))
             device_age = float(request.form.get("device_age", 365))
             location_diff = float(request.form.get("location_diff", 0))
             hour = int(request.form.get("hour", 12))
+            prev_fraud = request.form.get("prev_fraud", "no")  # yes / no
 
-            # ---- Simple rule-based "AI" for demo ----
             score = 0.0
+            reasons = []
 
-            # High amount → more risky
-            if amount > 20000:
+            # 1. Amount based risk
+            if amount > 50000:
                 score += 0.5
+                reasons.append("Very high transaction amount")
+            elif amount > 20000:
+                score += 0.35
+                reasons.append("High transaction amount")
             elif amount > 10000:
+                score += 0.2
+                reasons.append("Moderate transaction amount")
+
+            # 2. Location difference
+            if location_diff > 200:
                 score += 0.3
-            elif amount > 5000:
+                reasons.append("Unusual location (very far from normal)")
+            elif location_diff > 80:
+                score += 0.2
+                reasons.append("Location different from usual city")
+
+            # 3. Device age
+            if device_age < 7:
+                score += 0.25
+                reasons.append("New / untrusted device used")
+            elif device_age < 30:
                 score += 0.15
+                reasons.append("Recently used new device")
 
-            # Location far from usual
-            if location_diff > 100:
-                score += 0.3
-            elif location_diff > 50:
-                score += 0.2
-
-            # Very new device
-            if device_age < 30:
-                score += 0.2
-            elif device_age < 90:
-                score += 0.1
-
-            # Night time
+            # 4. Time of transaction
             if hour < 6 or hour > 22:
-                score += 0.1
+                score += 0.15
+                reasons.append("Transaction at unusual time (night hours)")
 
-            # Cap score between 0 and 1
-            score = min(score, 1.0)
+            # 5. Previous fraud history
+            if prev_fraud == "yes":
+                score += 0.25
+                reasons.append("Account has previous fraud history")
 
-            if score >= 0.5:
-                label = "⚠️ Fraudulent / Suspicious Transaction"
+            # Cap score
+            if score < 0:
+                score = 0
+            if score > 1:
+                score = 1
+
+            risk_percent = round(score * 100, 2)
+
+            # Risk level
+            if risk_percent >= 70:
+                risk_level = "High Risk"
+                label = "⚠️ Highly Suspicious / Possible Fraud"
+                color = "high"
+            elif risk_percent >= 40:
+                risk_level = "Medium Risk"
+                label = "⚠️ Suspicious Transaction – Needs Review"
+                color = "medium"
             else:
+                risk_level = "Low Risk"
                 label = "✅ Likely Legitimate Transaction"
+                color = "low"
+
+            if not reasons:
+                reasons.append("No strong fraud signals detected")
 
             result = {
                 "label": label,
-                "risk": round(score * 100, 2),
+                "risk_percent": risk_percent,
+                "risk_level": risk_level,
+                "color": color,
                 "amount": amount,
                 "device_age": device_age,
                 "location_diff": location_diff,
                 "hour": hour,
+                "prev_fraud": prev_fraud,
+                "reasons": reasons
             }
+
         except Exception as e:
             result = {"error": str(e)}
 
