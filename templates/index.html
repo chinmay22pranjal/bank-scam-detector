@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Scam Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 480px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Bank Scam Detector</h1>
+    <form method="POST">
+        <label>Amount (₹)</label><br>
+        <input name="amount"><br><br>
+
+        <label>Device Age (days)</label><br>
+        <input name="device_age"><br><br>
+
+        <label>Location Difference (km)</label><br>
+        <input name="location_diff"><br><br>
+
+        <label>Hour (0-23)</label><br>
+        <input name="hour"><br><br>
+
+        <button>Check</button>
+    </form>
+
+    {% if result %}
+        <div style="margin-top:20px;">
+            <strong>Result:</strong> {{ result.label }}<br>
+            <strong>Risk:</strong> {{ result.risk }}%
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>
