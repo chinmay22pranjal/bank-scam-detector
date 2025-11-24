@@ -2,53 +2,305 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bank Scam Detector</title>
+    <title>Bank Scam Detection System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background: #f3f3f3;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0b1536, #123d77);
+            color: #f5f7fb;
+            min-height: 100vh;
+        }
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+        header {
             display: flex;
-            justify-content: center;
-            padding: 20px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.05em;
+        }
+        .logo span {
+            color: #4fd1c5;
+        }
+        nav a {
+            margin-left: 20px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #dbe4ff;
+            opacity: 0.85;
+        }
+        nav a:hover {
+            opacity: 1;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
         .card {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 480px;
-            width: 100%;
+            background: rgba(7, 16, 40, 0.92);
+            border-radius: 16px;
+            padding: 20px 22px;
+            box-shadow: 0 16px 35px rgba(0,0,0,0.5);
+            border: 1px solid rgba(88, 129, 234, 0.4);
         }
         h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #c4d7ff;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        ul {
+            margin-left: 18px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 209, 197, 0.12);
+            color: #7ee7d9;
+            border: 1px solid rgba(79, 209, 197, 0.4);
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            font-size: 13px;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: #4fd1c5;
+            box-shadow: 0 0 0 1px rgba(79, 209, 197, 0.8);
+        }
+        button {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #e5f0ff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
+        }
+        button:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+        .result-card {
+            margin-top: 14px;
+            padding: 14px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.95);
+        }
+        .result-high {
+            border-color: rgba(248, 113, 113, 0.9);
+            background: rgba(127, 29, 29, 0.9);
+        }
+        .result-medium {
+            border-color: rgba(252, 211, 77, 0.9);
+            background: rgba(113, 63, 18, 0.9);
+        }
+        .result-low {
+            border-color: rgba(74, 222, 128, 0.9);
+            background: rgba(22, 101, 52, 0.9);
+        }
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .small-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .risk {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .footer {
+            margin-top: 18px;
+            font-size: 11px;
+            opacity: 0.7;
             text-align: center;
+        }
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .chip {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: rgba(15, 23, 42, 0.9);
         }
     </style>
 </head>
 <body>
-<div class="card">
-    <h1>Bank Scam Detector</h1>
-    <form method="POST">
-        <label>Amount (₹)</label><br>
-        <input name="amount"><br><br>
+<div class="page">
+    <header>
+        <div class="logo">Secure<span>Bank</span> AI</div>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#how">How it works</a>
+            <a href="#detect">Live Detector</a>
+        </nav>
+    </header>
 
-        <label>Device Age (days)</label><br>
-        <input name="device_age"><br><br>
+    <div class="grid">
+        <!-- Left: Explanation -->
+        <section class="card" id="about">
+            <div class="tag">BCA Minor Project · Bank Scam Detection System</div>
+            <h1>AI-based Bank Scam Detection</h1>
+            <p>
+                This system helps a bank detect <b>fraudulent or suspicious online transactions</b> before the
+                money leaves the customer’s account. It uses a risk-scoring model based on real banking
+                parameters like amount, device trust, location change and transaction time.
+            </p>
+            <p style="margin-top:8px;">
+                <b>Why is this important?</b>
+            </p>
+            <ul>
+                <li>Digital payments and UPI are increasing, so online scams are also increasing.</li>
+                <li>Manual monitoring is slow; AI can flag risky transactions instantly.</li>
+                <li>Early detection helps reduce financial loss for customers and banks.</li>
+            </ul>
 
-        <label>Location Difference (km)</label><br>
-        <input name="location_diff"><br><br>
+            <section id="how" style="margin-top:12px;">
+                <h2>How this detection works</h2>
+                <ul>
+                    <li><b>High amount</b> + <b>new device</b> + <b>unusual location</b> = higher fraud score.</li>
+                    <li>Night-time transactions are slightly more risky than day-time transactions.</li>
+                    <li>If the account has <b>previous fraud history</b>, risk goes up.</li>
+                    <li>All these signals are combined into a <b>0–100% risk score</b>.</li>
+                </ul>
+            </section>
 
-        <label>Hour (0-23)</label><br>
-        <input name="hour"><br><br>
+            <div class="chips">
+                <div class="chip">Python · Flask</div>
+                <div class="chip">Risk Scoring Model</div>
+                <div class="chip">Bank Fraud / Scam Detection</div>
+            </div>
+        </section>
 
-        <button>Check</button>
-    </form>
+        <!-- Right: Form + Result -->
+        <section class="card" id="detect">
+            <h2>Live Transaction Risk Analyzer</h2>
+            <p class="small-label" style="margin-bottom:10px;">
+                Enter transaction details below. The system will estimate fraud risk in percentage and classify the transaction.
+            </p>
+            <form method="POST">
+                <div class="form-group">
+                    <label>Transaction Amount (₹)</label>
+                    <input type="number" name="amount" step="0.01" required placeholder="e.g. 15000">
+                </div>
+                <div class="form-group">
+                    <label>Device Age (days)</label>
+                    <input type="number" name="device_age" required placeholder="e.g. 365">
+                </div>
+                <div class="form-group">
+                    <label>Location Difference (km from usual location)</label>
+                    <input type="number" name="location_diff" step="0.1" required placeholder="e.g. 10">
+                </div>
+                <div class="form-group">
+                    <label>Transaction Hour (0–23)</label>
+                    <input type="number" name="hour" min="0" max="23" required placeholder="e.g. 14">
+                </div>
+                <div class="form-group">
+                    <label>Previous Fraud History on Account?</label>
+                    <select name="prev_fraud" required>
+                        <option value="no">No</option>
+                        <option value="yes">Yes, fraud reported earlier</option>
+                    </select>
+                </div>
+                <button type="submit">Analyze Transaction Risk</button>
+            </form>
 
-    {% if result %}
-        <div style="margin-top:20px;">
-            <strong>Result:</strong> {{ result.label }}<br>
-            <strong>Risk:</strong> {{ result.risk }}%
-        </div>
-    {% endif %}
+            {% if result %}
+                {% if result.error %}
+                    <div class="result-card" style="margin-top:14px; border-color:#fecaca; background:#7f1d1d;">
+                        <div class="result-title">Error while processing input</div>
+                        <p>{{ result.error }}</p>
+                    </div>
+                {% else %}
+                    <div class="result-card result-{{ result.color }}">
+                        <div class="result-title">{{ result.label }}</div>
+                        <p><span class="small-label">Risk Score:</span>
+                            <span class="risk">{{ result.risk_percent }}%</span>
+                            – {{ result.risk_level }}
+                        </p>
+                        <p class="small-label" style="margin-top:6px;"><b>Why this decision?</b></p>
+                        <ul>
+                            {% for r in result.reasons %}
+                                <li>{{ r }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="small-label" style="margin-top:8px;"><b>Transaction Details:</b></p>
+                        <ul>
+                            <li>Amount: ₹ {{ result.amount }}</li>
+                            <li>Device age: {{ result.device_age }} days</li>
+                            <li>Location difference: {{ result.location_diff }} km</li>
+                            <li>Transaction hour: {{ result.hour }}:00</li>
+                            <li>Previous fraud history: {{ "Yes" if result.prev_fraud == "yes" else "No" }}</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="footer">
+                Project: Bank Scam Detection System · Developed by Chinmay Pranjal, Prince Raj, Shruti Kumari (BCA)
+            </div>
+        </section>
+    </div>
 </div>
 </body>
 </html>
